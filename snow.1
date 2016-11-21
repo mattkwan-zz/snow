@@ -1,0 +1,141 @@
+.TH SNOW 1 "28 Dec 1996" "Version 1.1"
+.SH NAME
+snow \- whitespace steganography program
+.SH SYNOPSIS
+.B snow
+[
+.B -CQS
+] [
+.B -h
+|
+.B --help
+] [
+.B -V
+|
+.B --version
+] [
+.B -p
+.I passwd
+] [
+.B -l
+.I line-len
+] [
+.B -f
+.I file
+|
+.B -m
+.I message
+] [
+.I infile
+[
+.I outfile
+]]
+.SH DESCRIPTION
+\fBsnow\fP is a program for concealing messages in text files
+by appending tabs and spaces on the end of lines, and for
+extracting messages from files containing hidden messages.
+Tabs and spaces are invisible to most text viewers, hence the
+steganographic nature of this encoding scheme.
+.PP
+The data is concealed in the text file by appending sequences of up
+to 7 spaces, interspersed with tabs. This usually allows 3 bits
+to be stored every 8 columns. An alternative encoding scheme, using
+alternating spaces and tabs to represent zeroes and ones, was rejected
+because, although it used fewer bytes, it required more columns per bit
+(4.5 vs 2.67).
+.PP
+The start of the data is indicated by an appended tab character, which
+allows the insertion of mail and news headers without corrupting
+the data.
+.PP
+\fBsnow\fP provides rudimentary compression, using Huffman tables
+optimised for English text. However, if the data is not text, or if
+there is a lot of data, the use of the built-in compression is not
+recommended, since an external compression program such as
+\fBcompress\fP or \fBgzip\fP will do a much better job.
+.PP
+Encryption is also provided, using the ICE encryption algorithm
+in 1-bit cipher-feedback (CFB) mode. Because of ICE's arbitrary
+key size, passwords of any length up to 1170 characters are supported
+(since only 7 bits of each character are used, keys up to 1024-bytes
+are supported).
+.PP
+If a message string or message file are specified on the command-line,
+\fBsnow\fP will attempt to conceal the message in the file \fIinfile\fP
+if specified, or standard input otherwise. The resulting file will be
+written to \fIoutfile\fP if specified, or standard output if not.
+.PP
+If no message string is provided, \fBsnow\fP attempts to extract a
+message from the input file. The result is written to the output file
+or standard output.
+.SH OPTIONS
+.TP
+.B -C
+Compress the data if concealing, or uncompress it if extracting.
+.TP
+\fB-f\fP \fImessage-file\fP
+The contents of this file will be concealed in the input text file.
+.TP
+\fB-l\fP \fIline-len\fP
+When appending whitespace, \fBsnow\fP will always produce lines shorter
+than this value. By default it is set to 80.
+.TP
+\fB-m\fP \fImessage-string\fP
+The contents of this string will be concealed in the input text file.
+Note that, unless a newline is somehow included in the string, a newline
+will not be printed when the message is extracted.
+.TP
+\fB-p\fP \fIpassword\fP
+If this is set, the data will be encrypted with this password during
+concealment, or decrypted during extraction.
+.TP
+.B -Q
+Quiet mode. If not set, the program reports statistics such as
+compression percentages and amount of available storage space used.
+.TP
+.B -S
+Report on the approximate amount of space available for hidden
+message in the text file. Line length is taken into account, but
+other options are ignored.
+.TP
+.B -V, --version
+Display usage information and exit.
+.TP
+.B -h, --help
+Display usage information and exit.
+.SH EXAMPLES
+The following command will conceal the message "I am lying" in the
+file \fIinfile\fP, with compression, and encrypted with the password
+"hello world". The resulting text will be stored in \fIoutfile\fP.
+.PP
+.RS
+\fBsnow \-C \-m "I am lying" \-p "hello world" infile outfile\fP
+.RE
+.PP
+To extract the message, the command would be
+.PP
+.RS
+\fBsnow \-C \-p "hello world" outfile\fP
+.RE
+.PP
+Note that the resulting message will not be terminated by a newline.
+.PP
+To prevent line wrap if text with concealed whitespace is likely to
+be indented by mail or news readers, a line length of 72 or less can
+be used.
+.PP
+.RS
+\fBsnow \-C \-l 72 \-m "I am lying" infile outfile\fP
+.RE
+.PP
+The approximate storage capacity of a file can be determined with
+the \fB-S\fP option.
+.PP
+.RS
+\fBsnow \-S \-l 72 infile\fP
+.RE
+.SH AUTHOR
+This application was written by Matthew Kwan, who can be reached at
+mkwan@darkside.com.au
+.SH SEE ALSO
+\fBice_key_create\fP(3)
