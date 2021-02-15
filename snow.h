@@ -19,6 +19,7 @@
 #define _SNOW_H
 
 #include <stdio.h>
+#include <string.h>
 
 
 /*
